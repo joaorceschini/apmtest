@@ -122,11 +122,7 @@
     if (arr.length == 0 && crescentChange == false) {
       score.end = new Date().getTime();
       ctx.font = "30px Arial";
-      if (dark_mode) {
-        ctx.fillStyle = "white";
-      } else {
-        ctx.fillStyle = "black";
-      }
+      ctx.fillStyle = "black";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       score.active = false;
