@@ -1,0 +1,356 @@
+<html id="webpage">
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Almendra:ital,wght@0,400;0,700;1,400;1,700&family=JetBrains+Mono:ital@0;1&family=Oxanium:wght@200..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1 id="title">apm test</h1>
+    <div class="settings">
+      <!-- <button onclick="darkMode()">dark mode</button> -->
+      <button id="crescentDecrescent" onclick="crescentDecrescent()">
+        crescent
+      </button>
+      <label for="circles-select">circles</label>
+      <select name="circles" id="circles-select">
+        <option value="6" selected>6</option>
+        <option value="5">5</option>
+        <option value="4">4</option>
+        <option value="3">3</option>
+      </select>
+    </div>
+    <canvas id="canvas" width="500" height="300"></canvas>
+    <footer>
+      <p>
+        r or space or click in the title to reset<br />6, 5, 4, 3 to select
+        circles
+      </p>
+      <p>
+        original site:
+        <a href="https://dwlim.github.io/apmtest/" target="_blank">dwlim</a
+        ><br />github:
+        <a href="https://github.com/joaorceschini/apmtest" target="_blank">dwlim</a>
+      </p>
+    </footer>
+  </body>
+</html>
+<script>
+  function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  // params = returnParam();
+  // var dark_mode = params.get("dark-mode") === "true";
+  // if (dark_mode == true) {
+  //   canvas.classList.add("dark-mode");
+  //   var element = document.getElementById("webpage");
+  //   element.classList.add("dark-mode-page");
+  // }
+
+  // function darkMode() {
+  //   dark_mode = !dark_mode;
+  //   insertParam("dark-mode", dark_mode);
+  // }
+
+  // function returnParam() {
+  //   let map = new Map();
+  //   params = document.location.search.substr(1).split("&");
+  //   let i = 1;
+  //   for (; i < params.length; i++) {
+  //     let pair = params[i].split("=");
+  //     map.set(pair[0], pair[1]);
+  //   }
+  //   return map;
+  // }
+
+  // function insertParam(key, value) {
+  //   key = encodeURIComponent(key);
+  //   value = encodeURIComponent(value);
+
+  //   // kvp looks like ['key1=value1', 'key2=value2', ...]
+  //   var kvp = document.location.search.substr(1).split("&");
+  //   let i = 0;
+
+  //   for (; i < kvp.length; i++) {
+  //     if (kvp[i].startsWith(key + "=")) {
+  //       let pair = kvp[i].split("=");
+  //       pair[1] = value;
+  //       kvp[i] = pair.join("=");
+  //       break;
+  //     }
+  //   }
+
+  //   if (i >= kvp.length) {
+  //     kvp[kvp.length] = [key, value].join("=");
+  //   }
+
+  //   // can return this or...
+  //   let params = kvp.join("&");
+
+  //   // reload page with new params
+  //   document.location.search = params;
+  // }
+
+  var crescentChange;
+
+  function crescentDecrescent() {
+    score.active = false;
+    crescentChange = true;
+    numbers.arr = [];
+
+    if (!numbers.crescent) {
+      numbers.crescent = true;
+      numbers.pos = 1;
+      document.getElementById("crescentDecrescent").innerText = "decrescent";
+    } else {
+      numbers.crescent = false;
+      numbers.pos = numbers.maxCircles;
+      document.getElementById("crescentDecrescent").innerText = "crescent";
+    }
+
+    initialize();
+  }
+
+  function drawCircles(arr) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (arr.length == 0 && crescentChange == false) {
+      score.end = new Date().getTime();
+      ctx.font = "30px Arial";
+      if (dark_mode) {
+        ctx.fillStyle = "white";
+      } else {
+        ctx.fillStyle = "black";
+      }
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      score.active = false;
+      var time = score.end - score.start;
+      var apm = Math.ceil((numbers.maxCircles / time) * 1e3 * 60 * 1.8);
+      ctx.fillText(
+        "Time: " + time / 1000 + "\nAPM: " + apm,
+        canvas.width / 2,
+        canvas.height / 2
+      );
+    } else {
+      crescentChange = false;
+    }
+
+    arr
+      .slice()
+      .reverse()
+      .forEach((circle) => {
+        ctx.beginPath();
+        ctx.arc(circle.x, circle.y, radius, 0, 2 * Math.PI, false);
+        ctx.fillStyle = "#333333";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(circle.x, circle.y, radius - border, 0, 2 * Math.PI, false);
+        ctx.fillStyle = "#666666";
+        ctx.fill();
+
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(circle.n, circle.x, circle.y);
+      });
+  }
+
+  function spawnCircle(numbers) {
+    var circle = {
+      x: getRndInteger(radius, canvas.width - radius),
+      y: getRndInteger(radius, canvas.height - radius),
+      n: numbers.pos,
+    };
+    if (!numbers.crescent && numbers.pos > 0) {
+      numbers.pos -= 1;
+      numbers.arr.push(circle);
+      return;
+    }
+    if (numbers.crescent && numbers.pos <= numbers.maxCircles) {
+      numbers.pos += 1;
+      numbers.arr.push(circle);
+      return;
+    }
+  }
+  var selectedCircles = 6;
+
+  const radius = 25;
+  const border = 2;
+  var num_circles = selectedCircles;
+  var numbers = {
+    arr: [],
+    pos: 0,
+    crescent: false,
+    maxCircles: 50,
+  };
+
+  var score = {
+    active: false,
+    start: null,
+    end: null,
+  };
+
+  function posReset() {
+    if (numbers.crescent) {
+      numbers.pos = 1;
+    } else {
+      numbers.pos = numbers.maxCircles;
+    }
+  }
+
+  posReset();
+
+  function initialize() {
+    for (i = 0; i < num_circles; i++) {
+      spawnCircle(numbers);
+    }
+
+    drawCircles(numbers.arr);
+  }
+
+  initialize();
+
+  function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top,
+    };
+  }
+
+  function reset() {
+    score.active = false;
+    numbers.arr = [];
+    num_circles = selectedCircles;
+    posReset();
+    initialize();
+  }
+
+  var circleSelectElement = document.getElementById("circles-select");
+
+  document.addEventListener("keyup", (event) => {
+    if (
+      event.key === "r" ||
+      event.code === "KeyR" ||
+      event.which === "82" ||
+      event.key === " " ||
+      event.code === "Space" ||
+      event.which === "32"
+    ) {
+      reset();
+      return;
+    }
+    console.log("chegou aq");
+    if (event.key === "6" || event.code === "Digit6" || event.which === "54") {
+      selectedCircles = 6;
+      circleSelectElement.value = 6;
+      reset();
+    } else if (
+      event.key === "5" ||
+      event.code === "Digit5" ||
+      event.which === "53"
+    ) {
+      selectedCircles = 5;
+      circleSelectElement.value = 5;
+      reset();
+    } else if (
+      event.key === "4" ||
+      event.code === "Digit4" ||
+      event.which === "52"
+    ) {
+      selectedCircles = 4;
+      circleSelectElement.value = 4;
+      reset();
+    } else if (
+      event.key === "3" ||
+      event.code === "Digit3" ||
+      event.which === "51"
+    ) {
+      selectedCircles = 3;
+      circleSelectElement.value = 3;
+      reset();
+    }
+  });
+
+  document.getElementById("title").addEventListener("click", (e) => {
+    reset();
+  });
+
+  circleSelectElement.addEventListener("change", function () {
+    switch (this.value) {
+      case "6":
+        selectedCircles = 6;
+        break;
+      case "5":
+        selectedCircles = 5;
+        break;
+      case "4":
+        selectedCircles = 4;
+        break;
+      case "3":
+        selectedCircles = 3;
+        break;
+      default:
+        selectedCircles = 6;
+    }
+    reset();
+  });
+
+  canvas.addEventListener("mousedown", (e) => {
+    if (numbers.arr.length != 0) {
+      const mouse_pos = getMousePos(canvas, e);
+      if (
+        Math.abs(mouse_pos.x - numbers.arr[0].x) <= radius &&
+        Math.abs(mouse_pos.y - numbers.arr[0].y) <= radius
+      ) {
+        if (!score.active) {
+          score.active = true;
+          score.start = new Date().getTime();
+        }
+        numbers.arr.shift();
+        spawnCircle(numbers);
+        drawCircles(numbers.arr);
+      }
+    }
+  });
+</script>
+<style>
+  h1 {
+    font-family: "Almendra", sans-serif;
+  }
+  canvas {
+    padding-left: 0;
+    padding-right: 0;
+    margin: 40px auto;
+    display: block;
+    background-color: white;
+  }
+  .dark-mode {
+    background-color: black;
+  }
+  .dark-mode-page {
+    background-color: black;
+    color: white;
+  }
+  #title {
+    cursor: pointer;
+  }
+  .settings select {
+    background-color: #eee;
+    font-size: 13.3333px;
+    padding: 1px 6px;
+    border-radius: 10%;
+  }
+  footer p {
+    margin-top: 20px;
+    font-size: 16px;
+  }
+</style>
