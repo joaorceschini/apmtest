@@ -2,4 +2,4 @@
 
 to do list
 - [ ] hitsounds 
-- [ ] dark mode
+- [x] dark mode
