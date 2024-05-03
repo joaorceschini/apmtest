@@ -1,5 +1,5 @@
 # apmtest
 
 to do list
-- [ ] hitsounds 
+- [x] hitsounds 
 - [x] dark mode
