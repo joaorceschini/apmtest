@@ -10,7 +10,7 @@
   <body>
     <h1 id="title">apm test</h1>
     <div class="settings">
-      <!-- <button onclick="darkMode()">dark mode</button> -->
+      <button id="dark-light" onclick="darkLight()">dark mode</button>
       <button id="crescentDecrescent" onclick="crescentDecrescent()">
         crescent
       </button>
@@ -44,57 +44,22 @@
 
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
-  // params = returnParam();
-  // var dark_mode = params.get("dark-mode") === "true";
-  // if (dark_mode == true) {
-  //   canvas.classList.add("dark-mode");
-  //   var element = document.getElementById("webpage");
-  //   element.classList.add("dark-mode-page");
-  // }
 
-  // function darkMode() {
-  //   dark_mode = !dark_mode;
-  //   insertParam("dark-mode", dark_mode);
-  // }
+  const bodyElement = document.body;
+  const buttonDarkLightElement = document.getElementById("dark-light");
+  var darkMode;
 
-  // function returnParam() {
-  //   let map = new Map();
-  //   params = document.location.search.substr(1).split("&");
-  //   let i = 1;
-  //   for (; i < params.length; i++) {
-  //     let pair = params[i].split("=");
-  //     map.set(pair[0], pair[1]);
-  //   }
-  //   return map;
-  // }
-
-  // function insertParam(key, value) {
-  //   key = encodeURIComponent(key);
-  //   value = encodeURIComponent(value);
-
-  //   // kvp looks like ['key1=value1', 'key2=value2', ...]
-  //   var kvp = document.location.search.substr(1).split("&");
-  //   let i = 0;
-
-  //   for (; i < kvp.length; i++) {
-  //     if (kvp[i].startsWith(key + "=")) {
-  //       let pair = kvp[i].split("=");
-  //       pair[1] = value;
-  //       kvp[i] = pair.join("=");
-  //       break;
-  //     }
-  //   }
-
-  //   if (i >= kvp.length) {
-  //     kvp[kvp.length] = [key, value].join("=");
-  //   }
-
-  //   // can return this or...
-  //   let params = kvp.join("&");
-
-  //   // reload page with new params
-  //   document.location.search = params;
-  // }
+  function darkLight() {
+    if (!darkMode) {
+      bodyElement.className = "dark-mode";
+      buttonDarkLightElement.innerText = "light mode"
+      darkMode = true;
+    } else {
+      bodyElement.className = "light-mode";
+      buttonDarkLightElement.innerText = "dark mode"
+      darkMode = false;
+    }
+  }
 
   var crescentChange;
 
@@ -122,7 +87,11 @@
     if (arr.length == 0 && crescentChange == false) {
       score.end = new Date().getTime();
       ctx.font = "30px Arial";
-      ctx.fillStyle = "black";
+      if (!darkMode) {
+        ctx.fillStyle = "black";
+      } else {
+        ctx.fillStyle = "white";
+      }
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       score.active = false;
@@ -244,7 +213,6 @@
       reset();
       return;
     }
-    console.log("chegou aq");
     if (event.key === "6" || event.code === "Digit6" || event.which === "54") {
       selectedCircles = 6;
       circleSelectElement.value = 6;
@@ -319,8 +287,25 @@
   });
 </script>
 <style>
+  .dark-mode {
+    background-color: black;
+    color: #ccc;
+  }
+  .dark-mode canvas {
+    background-color: black;
+  }
+  .dark-mode h1 {
+    color: white;
+  }
+  .dark-mode .settings select, .dark-mode button {
+    background-color: #333;
+    color: #ccc;
+    border: 1px solid #ccc;
+    border-radius: 5%;
+  }
   h1 {
     font-family: "Almendra", sans-serif;
+    cursor: pointer;
   }
   canvas {
     padding-left: 0;
@@ -328,16 +313,6 @@
     margin: 40px auto;
     display: block;
     background-color: white;
-  }
-  .dark-mode {
-    background-color: black;
-  }
-  .dark-mode-page {
-    background-color: black;
-    color: white;
-  }
-  #title {
-    cursor: pointer;
   }
   .settings select {
     background-color: #eee;
