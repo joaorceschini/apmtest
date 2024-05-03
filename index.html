@@ -1,6 +1,6 @@
 <html id="webpage">
   <head>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -12,6 +12,7 @@
     <h1 id="title">apm test</h1>
     <div class="settings">
       <button id="dark-light" onclick="darkLight()">dark mode</button>
+      <button id="sound" onclick="hitsoundSwith()">disable sound</button>
       <button id="crescentDecrescent" onclick="crescentDecrescent()">
         crescent
       </button>
@@ -26,19 +27,38 @@
     <canvas id="canvas" width="500" height="300"></canvas>
     <footer>
       <p>
-        r or space or click on the title to reset<br />6, 5, 4, 3 to select
-        circles
+        r or space or click on the title to reset
+        <br />
+        6, 5, 4, 3 to select circles
+        <br>
+        s to enable/disable sound
       </p>
       <p>
         original site:
         <a href="https://dwlim.github.io/apmtest/" target="_blank">dwlim</a
         ><br />github:
-        <a href="https://github.com/joaorceschini/apmtest" target="_blank">apmtest</a>
+        <a href="https://github.com/joaorceschini/apmtest" target="_blank"
+          >apmtest</a
+        >
       </p>
     </footer>
   </body>
 </html>
 <script>
+  var hitsound = new Audio("osu-hit-sound.wav");
+  var sound = true;
+  const buttonSoundElement = document.getElementById("sound");
+
+  function hitsoundSwith() {
+    if (!sound) {
+      buttonSoundElement.innerText = "disable sound";
+      sound = true;
+    } else {
+      buttonSoundElement.innerText = "enable sound";
+      sound = false;
+    }
+  }
+
   function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
   }
@@ -53,11 +73,11 @@
   function darkLight() {
     if (!darkMode) {
       bodyElement.className = "dark-mode";
-      buttonDarkLightElement.innerText = "light mode"
+      buttonDarkLightElement.innerText = "light mode";
       darkMode = true;
     } else {
       bodyElement.className = "light-mode";
-      buttonDarkLightElement.innerText = "dark mode"
+      buttonDarkLightElement.innerText = "dark mode";
       darkMode = false;
     }
   }
@@ -243,6 +263,9 @@
       circleSelectElement.value = 3;
       reset();
     }
+    if (event.key === "s" || event.code === "KeyS" || event.which === "83") {
+      hitsoundSwith();
+    }
   });
 
   document.getElementById("title").addEventListener("click", (e) => {
@@ -281,6 +304,10 @@
           score.start = new Date().getTime();
         }
         numbers.arr.shift();
+        if (sound) {
+          hitsound.play();
+          hitsound.currentTime = 0;
+        }
         spawnCircle(numbers);
         drawCircles(numbers.arr);
       }
@@ -298,7 +325,8 @@
   .dark-mode h1 {
     color: white;
   }
-  .dark-mode .settings select, .dark-mode button {
+  .dark-mode .settings select,
+  .dark-mode button {
     background-color: #333;
     color: #ccc;
     border: 1px solid #ccc;
