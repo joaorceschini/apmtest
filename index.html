@@ -83,6 +83,7 @@
     }
   }
 
+  var crescentDecrescentInfo = "decrescent";
   var crescentChange;
 
   function crescentDecrescent() {
@@ -94,10 +95,12 @@
       numbers.crescent = true;
       numbers.pos = 1;
       document.getElementById("crescentDecrescent").innerText = "decrescent";
+      crescentDecrescentInfo = "crescent";
     } else {
       numbers.crescent = false;
       numbers.pos = numbers.maxCircles;
       document.getElementById("crescentDecrescent").innerText = "crescent";
+      crescentDecrescentInfo = "decrescent";
     }
 
     initialize();
@@ -123,6 +126,17 @@
         "Time: " + time / 1000 + "\nAPM: " + apm,
         canvas.width / 2,
         canvas.height / 2
+      );
+      ctx.font = "14px Arial";
+      if (!darkMode) {
+        ctx.fillStyle = "#333";
+      } else {
+        ctx.fillStyle = "#aaa";
+      }
+      ctx.fillText(
+        crescentDecrescentInfo + " " + selectedCircles + " targets",
+        canvas.width / 2,
+        canvas.height / 2 + 25
       );
     } else {
       crescentChange = false;
