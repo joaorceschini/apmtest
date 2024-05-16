@@ -7,16 +7,25 @@
     <h1 id="title">apm test</h1>
     <div class="settings">
       <button id="dark-light" onclick="darkLight()">light mode</button>
-      <button id="sound" onclick="hitsoundSwith()">disable sound</button>
+      <label for="volume-slider">volume</label>
+      <input type="range" id="volume-slider" />
       <button id="crescentDecrescent" onclick="crescentDecrescent()">
         crescent
       </button>
       <label for="circles-select">targets</label>
       <select name="circles" id="circles-select">
+        <option value="10">10</option>
+        <option value="9">9</option>
+        <option value="8">8</option>
+        <option value="7">7</option>
+        <hr />
         <option value="6" selected>6</option>
         <option value="5">5</option>
         <option value="4">4</option>
         <option value="3">3</option>
+        <hr />
+        <option value="2">2</option>
+        <option value="1">1</option>
       </select>
     </div>
     <canvas id="canvas" width="500" height="300"></canvas>
@@ -24,9 +33,7 @@
       <p>
         r or space or click on the title to reset
         <br />
-        6, 5, 4, 3 to select targets
-        <br />
-        s to enable/disable sound
+        6, 5, 4, 3 to select main targets
       </p>
       <p>
         original site:
@@ -41,18 +48,12 @@
 </html>
 <script>
   var hitsound = new Audio("pop.wav");
-  var sound = true;
-  const buttonSoundElement = document.getElementById("sound");
+  hitsound.volume = 0.5;
 
-  function hitsoundSwith() {
-    if (!sound) {
-      buttonSoundElement.innerText = "disable sound";
-      sound = true;
-    } else {
-      buttonSoundElement.innerText = "enable sound";
-      sound = false;
-    }
-  }
+  let volume = document.getElementById("volume-slider");
+  volume.addEventListener("change", function (e) {
+    hitsound.volume = e.currentTarget.value / 100;
+  });
 
   function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
@@ -105,6 +106,11 @@
 
     if (arr.length == 0 && crescentChange == false) {
       score.end = new Date().getTime();
+      var sum = score.react.reduce(
+        (accumulator, currentValue) => accumulator + currentValue,
+        0
+      );
+      var average = Math.round(sum / score.react.length);
       ctx.font = "30px Arial";
       if (!darkMode) {
         ctx.fillStyle = "black";
@@ -127,8 +133,19 @@
       } else {
         ctx.fillStyle = "#aaa";
       }
+      var scoreInfoBellow;
+      if (selectedCircles == 1) {
+        scoreInfoBellow = crescentDecrescentInfo + " react mode"
+        ctx.fillText(
+          average + "ms average / " + Math.min(...score.react) + "ms min / " + Math.max(...score.react) + "ms max",
+          canvas.width / 2,
+          canvas.height / 2 - 30
+        );
+      } else {
+        scoreInfoBellow = crescentDecrescentInfo + " " + selectedCircles + " targets";
+      }
       ctx.fillText(
-        crescentDecrescentInfo + " " + selectedCircles + " targets",
+        scoreInfoBellow,
         canvas.width / 2,
         canvas.height / 2 + 25
       );
@@ -191,6 +208,9 @@
     active: false,
     start: null,
     end: null,
+    reactStart: null,
+    reactEnd: null,
+    react: [],
   };
 
   function posReset() {
@@ -225,6 +245,9 @@
     score.active = false;
     numbers.arr = [];
     num_circles = selectedCircles;
+    score.react = [];
+    score.reactStart = null;
+    score.reactEnd = null;
     posReset();
     initialize();
   }
@@ -243,37 +266,23 @@
       reset();
       return;
     }
-    if (event.key === "6" || event.code === "Digit6" || event.which === "54") {
-      selectedCircles = 6;
-      circleSelectElement.value = 6;
-      reset();
-    } else if (
+    if (
+      event.key === "6" ||
+      event.code === "Digit6" ||
+      event.which === "54" ||
       event.key === "5" ||
       event.code === "Digit5" ||
-      event.which === "53"
-    ) {
-      selectedCircles = 5;
-      circleSelectElement.value = 5;
-      reset();
-    } else if (
+      event.which === "53" ||
       event.key === "4" ||
       event.code === "Digit4" ||
-      event.which === "52"
-    ) {
-      selectedCircles = 4;
-      circleSelectElement.value = 4;
-      reset();
-    } else if (
+      event.which === "52" ||
       event.key === "3" ||
       event.code === "Digit3" ||
       event.which === "51"
     ) {
-      selectedCircles = 3;
-      circleSelectElement.value = 3;
+      selectedCircles = event.key;
+      circleSelectElement.value = event.key;
       reset();
-    }
-    if (event.key === "s" || event.code === "KeyS" || event.which === "83") {
-      hitsoundSwith();
     }
   });
 
@@ -282,22 +291,7 @@
   });
 
   circleSelectElement.addEventListener("change", function () {
-    switch (this.value) {
-      case "6":
-        selectedCircles = 6;
-        break;
-      case "5":
-        selectedCircles = 5;
-        break;
-      case "4":
-        selectedCircles = 4;
-        break;
-      case "3":
-        selectedCircles = 3;
-        break;
-      default:
-        selectedCircles = 6;
-    }
+    selectedCircles = this.value;
     reset();
   });
 
@@ -312,8 +306,16 @@
           score.active = true;
           score.start = new Date().getTime();
         }
+        if (score.reactStart != null) {
+          score.reactEnd = new Date().getTime();
+        }
+        var reactTime = score.reactEnd - score.reactStart;
+        if (reactTime != 0) {
+          score.react.push(reactTime);
+        }
+        score.reactStart = new Date().getTime();
         numbers.arr.shift();
-        if (sound) {
+        if (!hitsound.volume == 0) {
           hitsound.play();
           hitsound.currentTime = 0;
         }
@@ -357,6 +359,10 @@
     margin: 40px auto;
     display: block;
     background-color: white;
+  }
+  .settings {
+    display: flex;
+    gap: 5px;
   }
   .settings select {
     background-color: #eee;
