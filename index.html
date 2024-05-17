@@ -135,20 +135,22 @@
       }
       var scoreInfoBellow;
       if (selectedCircles == 1) {
-        scoreInfoBellow = crescentDecrescentInfo + " react mode"
+        scoreInfoBellow = crescentDecrescentInfo + " react mode";
         ctx.fillText(
-          average + "ms average / " + Math.min(...score.react) + "ms min / " + Math.max(...score.react) + "ms max",
+          average +
+            "ms average / " +
+            Math.min(...score.react) +
+            "ms min / " +
+            Math.max(...score.react) +
+            "ms max",
           canvas.width / 2,
           canvas.height / 2 - 30
         );
       } else {
-        scoreInfoBellow = crescentDecrescentInfo + " " + selectedCircles + " targets";
+        scoreInfoBellow =
+          crescentDecrescentInfo + " " + selectedCircles + " targets";
       }
-      ctx.fillText(
-        scoreInfoBellow,
-        canvas.width / 2,
-        canvas.height / 2 + 25
-      );
+      ctx.fillText(scoreInfoBellow, canvas.width / 2, canvas.height / 2 + 25);
     } else {
       crescentChange = false;
     }
@@ -245,9 +247,11 @@
     score.active = false;
     numbers.arr = [];
     num_circles = selectedCircles;
-    score.react = [];
-    score.reactStart = null;
-    score.reactEnd = null;
+    if (selectedCircles == 1) {
+      score.react = [];
+      score.reactStart = null;
+      score.reactEnd = null;
+    }
     posReset();
     initialize();
   }
@@ -306,14 +310,16 @@
           score.active = true;
           score.start = new Date().getTime();
         }
-        if (score.reactStart != null) {
-          score.reactEnd = new Date().getTime();
+        if (selectedCircles == 1) {
+          if (score.reactStart != null) {
+            score.reactEnd = new Date().getTime();
+          }
+          var reactTime = score.reactEnd - score.reactStart;
+          if (reactTime != 0) {
+            score.react.push(reactTime);
+          }
+          score.reactStart = new Date().getTime();
         }
-        var reactTime = score.reactEnd - score.reactStart;
-        if (reactTime != 0) {
-          score.react.push(reactTime);
-        }
-        score.reactStart = new Date().getTime();
         numbers.arr.shift();
         if (!hitsound.volume == 0) {
           hitsound.play();
