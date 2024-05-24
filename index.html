@@ -2,6 +2,56 @@
   <head>
     <title>apm test</title>
     <link rel="shortcut icon" href="favicon.ico" />
+    <style>
+      @font-face {
+        font-family: portcullion;
+        src: url(portcullion.ttf);
+      }
+      .dark-mode {
+        background-color: black;
+        color: #ccc;
+      }
+      .dark-mode canvas {
+        background-color: black;
+      }
+      .dark-mode h1 {
+        color: white;
+      }
+      .dark-mode .settings select,
+      .dark-mode button {
+        background-color: #333;
+        color: #ccc;
+        border: 1px solid #ccc;
+        border-radius: 5%;
+      }
+      h1 {
+        font-family: portcullion, sans-serif;
+        cursor: pointer;
+        font-size: 35px;
+        margin: 15px 0;
+      }
+      canvas {
+        padding-left: 0;
+        padding-right: 0;
+        margin: 40px auto;
+        display: block;
+        background-color: white;
+      }
+      .settings {
+        display: flex;
+        gap: 5px;
+      }
+      .settings select {
+        background-color: #eee;
+        font-size: 13.3333px;
+        padding: 1px 6px;
+        border-radius: 10%;
+      }
+      footer p {
+        margin-top: 20px;
+        font-size: 16px;
+      }
+    </style>
   </head>
   <body class="dark-mode">
     <h1 id="title">apm test</h1>
@@ -44,340 +94,295 @@
         >
       </p>
     </footer>
-  </body>
-</html>
-<script>
-  var hitsound = new Audio("pop.wav");
-  hitsound.volume = 0.5;
+    <script>
+      var hitsound = new Audio("pop.wav");
+      hitsound.volume = 0.5;
 
-  let volume = document.getElementById("volume-slider");
-  volume.addEventListener("change", function (e) {
-    hitsound.volume = e.currentTarget.value / 100;
-  });
-
-  function getRndInteger(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-  }
-
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
-
-  const bodyElement = document.body;
-  const buttonDarkLightElement = document.getElementById("dark-light");
-  var darkMode = true;
-
-  function darkLight() {
-    if (!darkMode) {
-      bodyElement.className = "dark-mode";
-      buttonDarkLightElement.innerText = "light mode";
-      darkMode = true;
-    } else {
-      bodyElement.className = "light-mode";
-      buttonDarkLightElement.innerText = "dark mode";
-      darkMode = false;
-    }
-  }
-
-  var crescentDecrescentInfo = "decrescent";
-  var crescentChange;
-
-  function crescentDecrescent() {
-    score.active = false;
-    crescentChange = true;
-    numbers.arr = [];
-
-    if (!numbers.crescent) {
-      numbers.crescent = true;
-      numbers.pos = 1;
-      document.getElementById("crescentDecrescent").innerText = "decrescent";
-      crescentDecrescentInfo = "crescent";
-    } else {
-      numbers.crescent = false;
-      numbers.pos = numbers.maxCircles;
-      document.getElementById("crescentDecrescent").innerText = "crescent";
-      crescentDecrescentInfo = "decrescent";
-    }
-
-    initialize();
-  }
-
-  function drawCircles(arr) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    if (arr.length == 0 && crescentChange == false) {
-      score.end = new Date().getTime();
-      var sum = score.react.reduce(
-        (accumulator, currentValue) => accumulator + currentValue,
-        0
-      );
-      var average = Math.round(sum / score.react.length);
-      ctx.font = "30px Arial";
-      if (!darkMode) {
-        ctx.fillStyle = "black";
-      } else {
-        ctx.fillStyle = "white";
-      }
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      score.active = false;
-      var time = score.end - score.start;
-      var apm = Math.ceil((numbers.maxCircles / time) * 1e3 * 60 * 1.8);
-      ctx.fillText(
-        "Time: " + time / 1000 + "\nAPM: " + apm,
-        canvas.width / 2,
-        canvas.height / 2
-      );
-      ctx.font = "14px Arial";
-      if (!darkMode) {
-        ctx.fillStyle = "#333";
-      } else {
-        ctx.fillStyle = "#aaa";
-      }
-      var scoreInfoBellow;
-      if (selectedCircles == 1) {
-        scoreInfoBellow = crescentDecrescentInfo + " react mode";
-        ctx.fillText(
-          average +
-            "ms average / " +
-            Math.min(...score.react) +
-            "ms min / " +
-            Math.max(...score.react) +
-            "ms max",
-          canvas.width / 2,
-          canvas.height / 2 - 30
-        );
-      } else {
-        scoreInfoBellow =
-          crescentDecrescentInfo + " " + selectedCircles + " targets";
-      }
-      ctx.fillText(scoreInfoBellow, canvas.width / 2, canvas.height / 2 + 25);
-    } else {
-      crescentChange = false;
-    }
-
-    arr
-      .slice()
-      .reverse()
-      .forEach((circle) => {
-        ctx.beginPath();
-        ctx.arc(circle.x, circle.y, radius, 0, 2 * Math.PI, false);
-        ctx.fillStyle = "#333333";
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(circle.x, circle.y, radius - border, 0, 2 * Math.PI, false);
-        ctx.fillStyle = "#666666";
-        ctx.fill();
-
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(circle.n, circle.x, circle.y);
+      let volume = document.getElementById("volume-slider");
+      volume.addEventListener("change", function (e) {
+        hitsound.volume = e.currentTarget.value / 100;
       });
-  }
 
-  function spawnCircle(numbers) {
-    var circle = {
-      x: getRndInteger(radius, canvas.width - radius),
-      y: getRndInteger(radius, canvas.height - radius),
-      n: numbers.pos,
-    };
-    if (!numbers.crescent && numbers.pos > 0) {
-      numbers.pos -= 1;
-      numbers.arr.push(circle);
-      return;
-    }
-    if (numbers.crescent && numbers.pos <= numbers.maxCircles) {
-      numbers.pos += 1;
-      numbers.arr.push(circle);
-      return;
-    }
-  }
-  var selectedCircles = 6;
+      function getRndInteger(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+      }
 
-  const radius = 25;
-  const border = 2;
-  var num_circles = selectedCircles;
-  var numbers = {
-    arr: [],
-    pos: 0,
-    crescent: false,
-    maxCircles: 50,
-  };
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
 
-  var score = {
-    active: false,
-    start: null,
-    end: null,
-    reactStart: null,
-    reactEnd: null,
-    react: [],
-  };
+      const bodyElement = document.body;
+      const buttonDarkLightElement = document.getElementById("dark-light");
+      var darkMode = true;
 
-  function posReset() {
-    if (numbers.crescent) {
-      numbers.pos = 1;
-    } else {
-      numbers.pos = numbers.maxCircles;
-    }
-  }
-
-  posReset();
-
-  function initialize() {
-    for (i = 0; i < num_circles; i++) {
-      spawnCircle(numbers);
-    }
-
-    drawCircles(numbers.arr);
-  }
-
-  initialize();
-
-  function getMousePos(canvas, evt) {
-    var rect = canvas.getBoundingClientRect();
-    return {
-      x: evt.clientX - rect.left,
-      y: evt.clientY - rect.top,
-    };
-  }
-
-  function reset() {
-    score.active = false;
-    numbers.arr = [];
-    num_circles = selectedCircles;
-    if (selectedCircles == 1) {
-      score.react = [];
-      score.reactStart = null;
-      score.reactEnd = null;
-    }
-    posReset();
-    initialize();
-  }
-
-  var circleSelectElement = document.getElementById("circles-select");
-
-  document.addEventListener("keyup", (event) => {
-    if (
-      event.key === "r" ||
-      event.code === "KeyR" ||
-      event.which === "82" ||
-      event.key === " " ||
-      event.code === "Space" ||
-      event.which === "32"
-    ) {
-      reset();
-      return;
-    }
-    if (
-      event.key === "6" ||
-      event.code === "Digit6" ||
-      event.which === "54" ||
-      event.key === "5" ||
-      event.code === "Digit5" ||
-      event.which === "53" ||
-      event.key === "4" ||
-      event.code === "Digit4" ||
-      event.which === "52" ||
-      event.key === "3" ||
-      event.code === "Digit3" ||
-      event.which === "51"
-    ) {
-      selectedCircles = event.key;
-      circleSelectElement.value = event.key;
-      reset();
-    }
-  });
-
-  document.getElementById("title").addEventListener("click", (e) => {
-    reset();
-  });
-
-  circleSelectElement.addEventListener("change", function () {
-    selectedCircles = this.value;
-    reset();
-  });
-
-  canvas.addEventListener("mousedown", (e) => {
-    if (numbers.arr.length != 0) {
-      const mouse_pos = getMousePos(canvas, e);
-      if (
-        Math.abs(mouse_pos.x - numbers.arr[0].x) <= radius &&
-        Math.abs(mouse_pos.y - numbers.arr[0].y) <= radius
-      ) {
-        if (!score.active) {
-          score.active = true;
-          score.start = new Date().getTime();
+      function darkLight() {
+        if (!darkMode) {
+          bodyElement.className = "dark-mode";
+          buttonDarkLightElement.innerText = "light mode";
+          darkMode = true;
+        } else {
+          bodyElement.className = "light-mode";
+          buttonDarkLightElement.innerText = "dark mode";
+          darkMode = false;
         }
-        if (selectedCircles == 1) {
-          if (score.reactStart != null) {
-            score.reactEnd = new Date().getTime();
+      }
+
+      var crescentDecrescentInfo = "decrescent";
+      var crescentChange;
+
+      function crescentDecrescent() {
+        score.active = false;
+        crescentChange = true;
+        numbers.arr = [];
+
+        if (!numbers.crescent) {
+          numbers.crescent = true;
+          numbers.pos = 1;
+          document.getElementById("crescentDecrescent").innerText =
+            "decrescent";
+          crescentDecrescentInfo = "crescent";
+        } else {
+          numbers.crescent = false;
+          numbers.pos = numbers.maxCircles;
+          document.getElementById("crescentDecrescent").innerText = "crescent";
+          crescentDecrescentInfo = "decrescent";
+        }
+
+        initialize();
+      }
+
+      function drawCircles(arr) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (arr.length == 0 && crescentChange == false) {
+          score.end = new Date().getTime();
+          var sum = score.react.reduce(
+            (accumulator, currentValue) => accumulator + currentValue,
+            0
+          );
+          var average = Math.round(sum / score.react.length);
+          ctx.font = "30px Arial";
+          if (!darkMode) {
+            ctx.fillStyle = "black";
+          } else {
+            ctx.fillStyle = "white";
           }
-          var reactTime = score.reactEnd - score.reactStart;
-          if (reactTime != 0) {
-            score.react.push(reactTime);
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          score.active = false;
+          var time = score.end - score.start;
+          var apm = Math.ceil((numbers.maxCircles / time) * 1e3 * 60 * 1.8);
+          ctx.fillText(
+            "Time: " + time / 1000 + "\nAPM: " + apm,
+            canvas.width / 2,
+            canvas.height / 2
+          );
+          ctx.font = "14px Arial";
+          if (!darkMode) {
+            ctx.fillStyle = "#333";
+          } else {
+            ctx.fillStyle = "#aaa";
           }
-          score.reactStart = new Date().getTime();
+          var scoreInfoBellow;
+          if (selectedCircles == 1) {
+            scoreInfoBellow = crescentDecrescentInfo + " react mode";
+            ctx.fillText(
+              average +
+                "ms average / " +
+                Math.min(...score.react) +
+                "ms min / " +
+                Math.max(...score.react) +
+                "ms max",
+              canvas.width / 2,
+              canvas.height / 2 - 30
+            );
+          } else {
+            scoreInfoBellow =
+              crescentDecrescentInfo + " " + selectedCircles + " targets";
+          }
+          ctx.fillText(
+            scoreInfoBellow,
+            canvas.width / 2,
+            canvas.height / 2 + 25
+          );
+        } else {
+          crescentChange = false;
         }
-        numbers.arr.shift();
-        if (!hitsound.volume == 0) {
-          hitsound.play();
-          hitsound.currentTime = 0;
+
+        arr
+          .slice()
+          .reverse()
+          .forEach((circle) => {
+            ctx.beginPath();
+            ctx.arc(circle.x, circle.y, radius, 0, 2 * Math.PI, false);
+            ctx.fillStyle = "#333333";
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(circle.x, circle.y, radius - border, 0, 2 * Math.PI, false);
+            ctx.fillStyle = "#666666";
+            ctx.fill();
+
+            ctx.font = "20px Arial";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(circle.n, circle.x, circle.y);
+          });
+      }
+
+      function spawnCircle(numbers) {
+        var circle = {
+          x: getRndInteger(radius, canvas.width - radius),
+          y: getRndInteger(radius, canvas.height - radius),
+          n: numbers.pos,
+        };
+        if (!numbers.crescent && numbers.pos > 0) {
+          numbers.pos -= 1;
+          numbers.arr.push(circle);
+          return;
         }
-        spawnCircle(numbers);
+        if (numbers.crescent && numbers.pos <= numbers.maxCircles) {
+          numbers.pos += 1;
+          numbers.arr.push(circle);
+          return;
+        }
+      }
+      var selectedCircles = 6;
+
+      const radius = 25;
+      const border = 2;
+      var num_circles = selectedCircles;
+      var numbers = {
+        arr: [],
+        pos: 0,
+        crescent: false,
+        maxCircles: 50,
+      };
+
+      var score = {
+        active: false,
+        start: null,
+        end: null,
+        reactStart: null,
+        reactEnd: null,
+        react: [],
+      };
+
+      function posReset() {
+        if (numbers.crescent) {
+          numbers.pos = 1;
+        } else {
+          numbers.pos = numbers.maxCircles;
+        }
+      }
+
+      posReset();
+
+      function initialize() {
+        for (i = 0; i < num_circles; i++) {
+          spawnCircle(numbers);
+        }
+
         drawCircles(numbers.arr);
       }
-    }
-  });
-</script>
-<style>
-  @font-face {
-    font-family: portcullion;
-    src: url(portcullion.ttf);
-  }
-  .dark-mode {
-    background-color: black;
-    color: #ccc;
-  }
-  .dark-mode canvas {
-    background-color: black;
-  }
-  .dark-mode h1 {
-    color: white;
-  }
-  .dark-mode .settings select,
-  .dark-mode button {
-    background-color: #333;
-    color: #ccc;
-    border: 1px solid #ccc;
-    border-radius: 5%;
-  }
-  h1 {
-    font-family: portcullion, sans-serif;
-    cursor: pointer;
-    font-size: 35px;
-    margin: 15px 0;
-  }
-  canvas {
-    padding-left: 0;
-    padding-right: 0;
-    margin: 40px auto;
-    display: block;
-    background-color: white;
-  }
-  .settings {
-    display: flex;
-    gap: 5px;
-  }
-  .settings select {
-    background-color: #eee;
-    font-size: 13.3333px;
-    padding: 1px 6px;
-    border-radius: 10%;
-  }
-  footer p {
-    margin-top: 20px;
-    font-size: 16px;
-  }
-</style>
+
+      initialize();
+
+      function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top,
+        };
+      }
+
+      function reset() {
+        score.active = false;
+        numbers.arr = [];
+        num_circles = selectedCircles;
+        if (selectedCircles == 1) {
+          score.react = [];
+          score.reactStart = null;
+          score.reactEnd = null;
+        }
+        posReset();
+        initialize();
+      }
+
+      var circleSelectElement = document.getElementById("circles-select");
+
+      document.addEventListener("keyup", (event) => {
+        if (
+          event.key === "r" ||
+          event.code === "KeyR" ||
+          event.which === "82" ||
+          event.key === " " ||
+          event.code === "Space" ||
+          event.which === "32"
+        ) {
+          reset();
+          return;
+        }
+        if (
+          event.key === "6" ||
+          event.code === "Digit6" ||
+          event.which === "54" ||
+          event.key === "5" ||
+          event.code === "Digit5" ||
+          event.which === "53" ||
+          event.key === "4" ||
+          event.code === "Digit4" ||
+          event.which === "52" ||
+          event.key === "3" ||
+          event.code === "Digit3" ||
+          event.which === "51"
+        ) {
+          selectedCircles = event.key;
+          circleSelectElement.value = event.key;
+          reset();
+        }
+      });
+
+      document.getElementById("title").addEventListener("click", (e) => {
+        reset();
+      });
+
+      circleSelectElement.addEventListener("change", function () {
+        selectedCircles = this.value;
+        reset();
+      });
+
+      canvas.addEventListener("mousedown", (e) => {
+        if (numbers.arr.length != 0) {
+          const mouse_pos = getMousePos(canvas, e);
+          if (
+            Math.abs(mouse_pos.x - numbers.arr[0].x) <= radius &&
+            Math.abs(mouse_pos.y - numbers.arr[0].y) <= radius
+          ) {
+            if (!score.active) {
+              score.active = true;
+              score.start = new Date().getTime();
+            }
+            if (selectedCircles == 1) {
+              if (score.reactStart != null) {
+                score.reactEnd = new Date().getTime();
+              }
+              var reactTime = score.reactEnd - score.reactStart;
+              if (reactTime != 0) {
+                score.react.push(reactTime);
+              }
+              score.reactStart = new Date().getTime();
+            }
+            numbers.arr.shift();
+            if (!hitsound.volume == 0) {
+              hitsound.play();
+              hitsound.currentTime = 0;
+            }
+            spawnCircle(numbers);
+            drawCircles(numbers.arr);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
